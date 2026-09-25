@@ -18,6 +18,31 @@ Dominó en parejas **estilo Puerto Rico** para FiveM, compatible con **QBCore**,
 
 > Las capturas son de la interfaz real con un fondo de ejemplo detrás; en el juego, detrás del cristal se ve tu personaje sentado en la mesa.
 
+<details>
+<summary><b>Ver todas las ventanas</b></summary>
+
+| Lobby solo con bots | Salida con la cochina |
+| --- | --- |
+| ![Lobby con bots](docs/lobby-bots.jpg) | ![Salida](docs/salida.jpg) |
+
+| Escoger la punta | Frases rápidas |
+| --- | --- |
+| ![Escoger punta](docs/escoger-punta.jpg) | ![Frases](docs/frases.jpg) |
+
+| ¡Se trancó! | Fin de partida |
+| --- | --- |
+| ![Tranque](docs/tranque.jpg) | ![Fin](docs/fin.jpg) |
+
+| ¡Pollona! | Reglas |
+| --- | --- |
+| ![Pollona](docs/pollona.jpg) | ![Reglas](docs/reglas.jpg) |
+
+| Modo colocar mesa (admin) |
+| --- |
+| ![Colocar](docs/colocar.jpg) |
+
+</details>
+
 ---
 
 ## Reglas del dominó boricua (lo que implementa el script)
