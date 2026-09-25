@@ -3,7 +3,11 @@
 local R = Config.Rules
 local T = Config.Timing
 
+local STATE_PREFIX = 'domino_boricua:'
+local SAVE_FILE = 'data/tables.json'
+
 local Tables = {}   -- [id] = estado de la mesa
+local Order = {}    -- ids en orden de creación
 local Seated = {}   -- [src] = id de la mesa donde está sentado
 local Watching = {} -- [src] = id de la mesa que está mirando (sin sentarse)
 local LastPhrase = {}
@@ -204,10 +208,31 @@ local function buildState(tbl, src)
     return state
 end
 
+-- Estado público (sin manos) que ven todos los clientes para dibujar la mesa 3D,
+-- sentar a los bots y marcar el turno.
+local function publish(tbl)
+    local seats = {}
+    for i = 1, 4 do
+        local s = tbl.seats[i]
+        seats[i] = s and { k = s.kind == 'player' and 'p' or 'b', n = s.name } or { k = '' }
+    end
+    local pub = { phase = tbl.phase, seats = seats, turn = 0 }
+    local g = tbl.game
+    if g and g.board then
+        pub.board = { c = g.board.center, l = g.board.leftArm, r = g.board.rightArm }
+        local counts = {}
+        for i = 1, 4 do counts[i] = g.hands and #g.hands[i] or 0 end
+        pub.counts = counts
+        pub.turn = tbl.phase == 'playing' and g.turn or 0
+    end
+    GlobalState[STATE_PREFIX .. tbl.id] = pub
+end
+
 local function sync(tbl)
     forEachRecipient(tbl, function(src)
         TriggerClientEvent('domino_boricua:client:state', src, buildState(tbl, src))
     end)
+    publish(tbl)
 end
 
 -- ------------------------------------------------------------
@@ -510,6 +535,7 @@ local function leaveSeat(src, reason)
     if not id then return end
     local tbl = Tables[id]
     Seated[src] = nil
+    if not tbl then return end
     local seat = seatOf(tbl, src)
 
     if seat then
@@ -741,20 +767,6 @@ local function refundTable(tbl)
     end
 end
 
--- /dominoreset [id]: reinicia una mesa (o todas) y devuelve las apuestas.
--- Permiso: add_ace group.admin command.dominoreset allow
-RegisterCommand('dominoreset', function(src, args)
-    local target = args[1]
-    for id, tbl in pairs(Tables) do
-        if not target or target == id then
-            refundTable(tbl)
-            resetTable(tbl)
-            sync(tbl)
-            print(('[domino-boricua] mesa %s reiniciada'):format(id))
-        end
-    end
-end, true)
-
 -- Si se apaga el recurso con partidas corriendo, se devuelven las apuestas.
 AddEventHandler('onResourceStop', function(resource)
     if resource ~= GetCurrentResourceName() then return end
@@ -762,10 +774,59 @@ AddEventHandler('onResourceStop', function(resource)
 end)
 
 -- ------------------------------------------------------------
--- Arranque
+-- Mesas: las de config.lua + las que crean los admins (data/tables.json)
 -- ------------------------------------------------------------
 
-for _, cfg in ipairs(Config.Tables) do
+local function plainCoords(c)
+    return { x = c.x + 0.0, y = c.y + 0.0, z = c.z + 0.0, w = (c.w or 0.0) + 0.0 }
+end
+
+local function clientTables()
+    local list = {}
+    for _, id in ipairs(Order) do
+        local cfg = Tables[id].cfg
+        list[#list + 1] = {
+            id = cfg.id,
+            label = cfg.label,
+            coords = cfg.coords,
+            spawnProps = cfg.spawnProps ~= false,
+            blip = cfg.blip ~= false,
+            tableModel = cfg.tableModel,
+            chairModel = cfg.chairModel,
+            dynamic = cfg.dynamic == true,
+        }
+    end
+    return list
+end
+
+local function broadcastTables(target)
+    TriggerClientEvent('domino_boricua:client:tables', target or -1, clientTables())
+end
+
+local function saveTables()
+    local list = {}
+    for _, id in ipairs(Order) do
+        local cfg = Tables[id].cfg
+        if cfg.dynamic then
+            list[#list + 1] = {
+                id = cfg.id,
+                label = cfg.label,
+                coords = cfg.coords,
+                blip = cfg.blip ~= false,
+                minBet = cfg.minBet,
+                maxBet = cfg.maxBet,
+                tableModel = cfg.tableModel,
+                chairModel = cfg.chairModel,
+                createdBy = cfg.createdBy,
+                createdAt = cfg.createdAt,
+            }
+        end
+    end
+    SaveResourceFile(GetCurrentResourceName(), SAVE_FILE, json.encode(list), -1)
+end
+
+local function addTable(cfg)
+    cfg.coords = plainCoords(cfg.coords)
     Tables[cfg.id] = {
         id = cfg.id,
         cfg = cfg,
@@ -782,4 +843,106 @@ for _, cfg in ipairs(Config.Tables) do
         actionId = 0,
         game = nil,
     }
+    Order[#Order + 1] = cfg.id
+    publish(Tables[cfg.id])
+    return Tables[cfg.id]
 end
+
+local function removeTable(id)
+    local tbl = Tables[id]
+    if not tbl then return false end
+    refundTable(tbl)
+    tbl.token = tbl.token + 1
+    for seat = 1, 4 do
+        local s = tbl.seats[seat]
+        if s and s.kind == 'player' then
+            Seated[s.src] = nil
+            TriggerClientEvent('domino_boricua:client:stand', s.src)
+            TriggerClientEvent('domino_boricua:client:closed', s.src, id)
+        end
+    end
+    for src in pairs(tbl.viewers) do
+        Watching[src] = nil
+        TriggerClientEvent('domino_boricua:client:closed', src, id)
+    end
+    Tables[id] = nil
+    for i, other in ipairs(Order) do
+        if other == id then
+            table.remove(Order, i)
+            break
+        end
+    end
+    GlobalState[STATE_PREFIX .. id] = nil
+    return true
+end
+
+RegisterNetEvent('domino_boricua:server:tables', function()
+    broadcastTables(source)
+end)
+
+-- API interna para server/admin.lua
+DominoTables = {
+    all = function()
+        local list = {}
+        for _, id in ipairs(Order) do list[#list + 1] = Tables[id] end
+        return list
+    end,
+    get = function(id) return Tables[id] end,
+    humans = humans,
+    add = function(cfg)
+        local tbl = addTable(cfg)
+        saveTables()
+        broadcastTables()
+        return tbl
+    end,
+    remove = function(id)
+        if not removeTable(id) then return false end
+        saveTables()
+        broadcastTables()
+        return true
+    end,
+    reset = function(id)
+        local tbl = Tables[id]
+        if not tbl then return false end
+        refundTable(tbl)
+        resetTable(tbl)
+        sync(tbl)
+        return true
+    end,
+}
+
+-- /dominoreset [id]: reinicia una mesa (o todas) y devuelve las apuestas.
+RegisterCommand('dominoreset', function(_, args)
+    for _, id in ipairs(Order) do
+        if not args[1] or args[1] == id then
+            DominoTables.reset(id)
+            print(('[domino-boricua] mesa %s reiniciada'):format(id))
+        end
+    end
+end, true)
+
+-- ------------------------------------------------------------
+-- Arranque
+-- ------------------------------------------------------------
+
+for _, cfg in ipairs(Config.Tables) do
+    local copy = {}
+    for k, v in pairs(cfg) do copy[k] = v end
+    addTable(copy)
+end
+
+do
+    local raw = LoadResourceFile(GetCurrentResourceName(), SAVE_FILE)
+    local ok, saved = pcall(json.decode, raw or '[]')
+    if ok and type(saved) == 'table' then
+        for _, cfg in ipairs(saved) do
+            if type(cfg) == 'table' and cfg.id and cfg.coords and not Tables[cfg.id] then
+                cfg.dynamic = true
+                cfg.spawnProps = true
+                addTable(cfg)
+            end
+        end
+    end
+end
+
+broadcastTables()

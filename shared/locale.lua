@@ -20,6 +20,12 @@ Locales['es'] = {
     your_turn         = '¡Te toca jugar en el dominó!',
     refund            = 'Se canceló la partida. Te devolvimos $%d.',
     coords_copied     = 'Coordenadas en la consola (F8): %s',
+    no_perms          = 'No tienes permiso pa\' administrar las mesas.',
+    table_created     = 'Mesa "%s" creada. ¡A jugar!',
+    table_deleted     = 'Mesa "%s" borrada.',
+    table_reset       = 'Mesa reiniciada.',
+    too_close         = 'Ya hay una mesa muy cerca de ese sitio.',
+    config_table      = 'Esa mesa está en config.lua; bórrala desde ahí.',
 }
 
 function L(key, ...)

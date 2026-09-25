@@ -32,12 +32,10 @@
     }
 
     const ICON = {
-        flag: `<svg viewBox="0 0 150 100"><rect width="150" height="100" fill="#e0262d"/><rect y="20" width="150" height="20" fill="#fff"/><rect y="60" width="150" height="20" fill="#fff"/><path d="M0 0L86.6 50L0 100Z" fill="#2f73e0"/><polygon fill="#fff" points="${starPoints(28.9, 50, 14, 5.6)}"/></svg>`,
+        flag: `<svg viewBox="0 0 150 100" preserveAspectRatio="xMinYMid slice"><rect width="150" height="100" fill="#e0263a"/><rect y="20" width="150" height="20" fill="#fff"/><rect y="60" width="150" height="20" fill="#fff"/><path d="M0 0L86.6 50L0 100Z" fill="#2f73e0"/><polygon fill="#fff" points="${starPoints(30, 50, 16, 6.4)}"/></svg>`,
         star: `<svg viewBox="0 0 100 100"><polygon fill="#fff" points="${starPoints(50, 53, 48, 19)}"/></svg>`,
         coqui: `<svg viewBox="0 0 64 64"><g stroke="#4a2e0e" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><path d="M18 45C7 44 5 55 13 57L23 55" fill="#b8792f"/><path d="M46 45C57 44 59 55 51 57L41 55" fill="#b8792f"/><ellipse cx="32" cy="42" rx="15" ry="12" fill="#d39545"/><path d="M21 45L14 52M43 45L50 52" fill="none"/><ellipse cx="32" cy="27" rx="14" ry="11" fill="#d39545"/><circle cx="23" cy="19" r="7" fill="#d39545"/><circle cx="41" cy="19" r="7" fill="#d39545"/></g><ellipse cx="32" cy="45" rx="8" ry="6" fill="#ecc07a"/><circle cx="23" cy="19" r="4.2" fill="#1b1b24"/><circle cx="41" cy="19" r="4.2" fill="#1b1b24"/><circle cx="24.6" cy="17.4" r="1.5" fill="#fff"/><circle cx="42.6" cy="17.4" r="1.5" fill="#fff"/><path d="M25 31Q32 35 39 31" fill="none" stroke="#4a2e0e" stroke-width="2" stroke-linecap="round"/><g fill="#f5d08f"><circle cx="12" cy="53" r="2.3"/><circle cx="15.5" cy="55" r="2"/><circle cx="52" cy="53" r="2.3"/><circle cx="48.5" cy="55" r="2"/><circle cx="11" cy="57" r="2"/><circle cx="53" cy="57" r="2"/></g></svg>`,
-        pava: `<svg viewBox="0 0 64 40"><ellipse cx="32" cy="29" rx="30" ry="8" fill="#ecca7f" stroke="#8a6424" stroke-width="2"/><path d="M19 28Q18 9 32 7Q46 9 45 28Z" fill="#f3d993" stroke="#8a6424" stroke-width="2"/><path d="M19.2 22Q32 25 44.8 22L45 27Q32 30 19 27Z" fill="#e0262d"/><path d="M24 14H40M23 18H41" stroke="#c9a456" stroke-width="1.2"/></svg>`,
-        garita: `<svg viewBox="0 0 80 120"><defs><linearGradient id="gGarita" x1="0" x2="1"><stop offset="0" stop-color="#f6e7c2"/><stop offset=".6" stop-color="#e2c68d"/><stop offset="1" stop-color="#b08b52"/></linearGradient></defs><circle cx="40" cy="9" r="4.5" fill="url(#gGarita)"/><rect x="38.5" y="12" width="3" height="5" fill="#b08b52"/><path d="M15 44Q15 16 40 16Q65 16 65 44Z" fill="url(#gGarita)"/><rect x="10" y="43" width="60" height="7" rx="2" fill="#f7ead0"/><rect x="16" y="50" width="48" height="42" fill="url(#gGarita)"/><rect x="35.5" y="58" width="9" height="24" rx="4.5" fill="#2b1c10"/><rect x="12" y="91" width="56" height="5" rx="2" fill="#f7ead0"/><path d="M16 96H64L50 116H30Z" fill="url(#gGarita)"/></svg>`,
-        chair: `<svg viewBox="0 0 40 40" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4V22H28"/><path d="M12 22V36M28 22V36M12 13H24"/></svg>`,
+        pava: `<svg viewBox="0 0 64 40"><ellipse cx="32" cy="29" rx="30" ry="8" fill="#ecca7f" stroke="#8a6424" stroke-width="2"/><path d="M19 28Q18 9 32 7Q46 9 45 28Z" fill="#f3d993" stroke="#8a6424" stroke-width="2"/><path d="M19.2 22Q32 25 44.8 22L45 27Q32 30 19 27Z" fill="#e0263a"/><path d="M24 14H40M23 18H41" stroke="#c9a456" stroke-width="1.2"/></svg>`,
         soundOn: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>`,
         soundOff: `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5"/></svg>`,
     };
@@ -104,7 +102,6 @@
                 try { localStorage.setItem('dominoBoricuaMuted', muted ? '1' : '0'); } catch { /* sin storage */ }
                 return muted;
             },
-            // ficha contra la mesa
             clack() {
                 const c = ac(); if (!c) return;
                 const t = c.currentTime;
@@ -152,13 +149,18 @@
         lastResultId: null,
         lastTurnId: null,
         lastHandNo: null,
+        freshAction: null,
+        dealAnim: false,
         selected: null,
         pending: false,
         resultDelayUntil: 0,
         overlayKey: '',
         rulesOpen: false,
         phrasesOpen: false,
+        phraseLock: 0,
         log: [],
+        admin: { open: false, data: null, view: 'list', model: null, form: null, confirm: null },
+        placement: { show: false },
     };
 
     const POS = ['bottom', 'right', 'top', 'left'];
@@ -223,9 +225,8 @@
         arm.forEach((t, idx) => {
             const inner = t[0];
             const outer = t[1];
-            const dbl = inner === outer;
             // un doble justo después de una esquina va acostado para no montarse
-            const cross = dbl && !afterCorner;
+            const cross = inner === outer && !afterCorner;
             const w = cross ? u : L;
             const h = cross ? L : u;
             const fits = d > 0 ? x + w + u <= bounds.right : x - w - u >= bounds.left;
@@ -235,11 +236,7 @@
                 if (cross) {
                     items.push({ a: inner, b: outer, orient: 'v', x: left, y: y - h / 2, w, h, arm: armName, idx });
                 } else {
-                    items.push({
-                        a: d > 0 ? inner : outer,
-                        b: d > 0 ? outer : inner,
-                        orient: 'h', x: left, y: y - h / 2, w, h, arm: armName, idx,
-                    });
+                    items.push({ a: d > 0 ? inner : outer, b: d > 0 ? outer : inner, orient: 'h', x: left, y: y - h / 2, w, h, arm: armName, idx });
                 }
                 x = d > 0 ? x + w : x - w;
                 afterCorner = false;
@@ -247,11 +244,7 @@
                 // esquina: ficha parada que baja (o sube) a la siguiente fila
                 const left = d > 0 ? x : x - u;
                 const top = vdir > 0 ? y - u / 2 : y + u / 2 - L;
-                items.push({
-                    a: vdir > 0 ? inner : outer,
-                    b: vdir > 0 ? outer : inner,
-                    orient: 'v', x: left, y: top, w: u, h: L, arm: armName, idx,
-                });
+                items.push({ a: vdir > 0 ? inner : outer, b: vdir > 0 ? outer : inner, orient: 'v', x: left, y: top, w: u, h: L, arm: armName, idx });
                 x = d > 0 ? x + u : x - u;
                 y += vdir * 2 * u;
                 d = -d;
@@ -259,7 +252,7 @@
             }
         });
 
-        // dónde caería la próxima ficha (para escoger la punta)
+        // dónde caería la próxima ficha (pa' escoger la punta)
         const fits = d > 0 ? x + L + u <= bounds.right : x - L - u >= bounds.left;
         if (fits) return { x: d > 0 ? x : x - L, y: y - u / 2, w: L, h: u };
         return { x: d > 0 ? x : x - u, y: vdir > 0 ? y - u / 2 : y + u / 2 - L, w: u, h: L };
@@ -279,8 +272,7 @@
         items.push({ a: c[0], b: c[1], orient: dbl ? 'v' : 'h', x: cx - cw / 2, y: cy - ch / 2, w: cw, h: ch, arm: 'center', idx: 0 });
         const right = placeArm(arr(board.rightArm), cx + cw / 2, cy, 1, 1, u, bounds, items, 'right');
         const left = placeArm(arr(board.leftArm), cx - cw / 2, cy, -1, -1, u, bounds, items, 'left');
-        const all = items.concat([right, left]);
-        const fits = all.every((it) => it.y >= bounds.top && it.y + it.h <= bounds.bottom);
+        const fits = items.concat([right, left]).every((it) => it.y >= bounds.top && it.y + it.h <= bounds.bottom);
         return { u, items, ends: { left, right }, fits };
     }
 
@@ -305,10 +297,15 @@
                 App.phrases = arr(data.phrases);
                 break;
             case 'open':
-                show();
+                App.visible = true;
+                updateVisibility();
+                render();
                 break;
             case 'close':
-                hide();
+                App.visible = false;
+                App.selected = null;
+                toggleRules(false);
+                updateVisibility();
                 break;
             case 'state':
                 setState(data.state);
@@ -316,11 +313,44 @@
             case 'phrase':
                 if (App.S) bubble(data.seat, App.phrases[data.index - 1] || '¡Wepa!');
                 break;
+            case 'admin':
+                App.admin.data = data.data;
+                if (data.data && data.data.open) {
+                    App.admin.view = 'list';
+                    App.admin.confirm = null;
+                }
+                renderAdmin();
+                break;
+            case 'adminOpen':
+                App.admin.open = true;
+                updateVisibility();
+                renderAdmin();
+                break;
+            case 'adminClose':
+                App.admin.open = false;
+                updateVisibility();
+                break;
+            case 'adminForm':
+                App.admin.view = 'form';
+                App.admin.form = { coords: data.coords, model: data.model, label: '', minBet: 0, maxBet: 5000, blip: true };
+                renderAdmin();
+                break;
+            case 'placement':
+                App.placement = { show: !!data.show, heading: data.heading || 0, valid: !!data.valid, label: data.label || App.placement.label };
+                updateVisibility();
+                renderPlacement();
+                break;
         }
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key !== 'Escape' || !App.visible) return;
+        if (e.key !== 'Escape') return;
+        if (App.admin.open) {
+            App.admin.open = false;
+            updateVisibility();
+            return post('adminClose');
+        }
+        if (!App.visible) return;
         if (App.rulesOpen) return toggleRules(false);
         if (App.phrasesOpen) {
             App.phrasesOpen = false;
@@ -336,25 +366,27 @@
     function fit() {
         const s = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H);
         $('#stage').style.transform = `scale(${s})`;
+        $('#adminLayer').style.transform = `scale(${s})`;
+        $('#placementHud').style.zoom = s;
     }
     window.addEventListener('resize', fit);
 
-    function show() {
-        App.visible = true;
-        $('#app').classList.add('visible');
+    function updateVisibility() {
+        const app = $('#app');
+        const any = App.visible || App.admin.open || App.placement.show;
+        app.classList.toggle('visible', any);
+        app.classList.toggle('dim', App.visible || App.admin.open);
+        $('#stage').classList.toggle('visible', App.visible);
+        $('#adminLayer').classList.toggle('show', App.admin.open);
+        $('#placementHud').classList.toggle('show', App.placement.show);
         fit();
-        render();
-    }
-
-    function hide() {
-        App.visible = false;
-        App.selected = null;
-        toggleRules(false);
-        $('#app').classList.remove('visible');
     }
 
     function closeUI() {
-        hide();
+        App.visible = false;
+        App.selected = null;
+        toggleRules(false);
+        updateVisibility();
         post('close');
     }
 
@@ -364,17 +396,18 @@
             App.lastActionId = null;
             App.lastResultId = null;
             App.overlayKey = '';
+            App.log = [];
         }
         App.S = next;
         App.pending = false;
         const g = next.game;
         if (!g || next.phase !== 'playing' || g.turn !== next.mySeat) App.selected = null;
-        react(prev, next);
+        react(next);
         render();
     }
 
     // Sonidos, gritos y burbujas según lo que pasó
-    function react(prev, S) {
+    function react(S) {
         const g = S.game;
         if (!g) {
             App.lastActionId = null;
@@ -442,7 +475,7 @@
     }
 
     // ------------------------------------------------------------
-    // Render
+    // Render de la mesa
     // ------------------------------------------------------------
 
     function render() {
@@ -458,11 +491,11 @@
             renderBoard();
             renderPlates();
             renderHand();
-            renderLibreta();
+            renderScore();
             renderGameSide();
         } else {
             renderLobby();
-            $('#libreta').innerHTML = '';
+            $('#score').innerHTML = '';
             renderLobbySide();
         }
         renderOverlay();
@@ -485,8 +518,6 @@
         const g = S.game;
         const el = $('#board');
         const board = g.board || {};
-        const W = el.clientWidth;
-        const H = el.clientHeight;
 
         if (!board.center) {
             let msg = 'Esperando la salida…';
@@ -494,12 +525,11 @@
             const starter = g.starter ? seatInfo(g.starter) : null;
             if (g.mustPlay) sub = 'La primera mano sale con el doble seis, la cochina';
             if (starter && !starter.empty) msg = S.mySeat === g.starter ? '¡Te toca salir!' : `Sale ${esc(starter.name)}`;
-            el.innerHTML = `<div class="board-empty"><div>${msg}<small>${sub}</small></div></div>`;
+            el.innerHTML = `<div class="board-empty"><div><b>${msg}</b><small>${sub}</small></div></div>`;
             return;
         }
 
-        const lay = layoutBoard(board, W, H);
-        el.style.setProperty('--u', `${lay.u}px`);
+        const lay = layoutBoard(board, el.clientWidth, el.clientHeight);
         const la = g.lastAction;
         const fresh = App.freshAction !== g.actionId && la && la.kind === 'play';
         const leftLen = arr(board.leftArm).length;
@@ -544,26 +574,24 @@
             for (let i = 0; i < count; i++) backs += backHTML(orient);
         }
 
-        let timer = '';
+        let ring = '';
         if (active) {
             const total = g.turnTotal || 30000;
             const left = g.turnRemaining || 0;
-            timer = left > 0
-                ? `<div class="timer"><span class="run" style="animation-duration:${left}ms;--from:${Math.min(1, left / total).toFixed(3)}"></span></div>`
-                : '<div class="timer"><span class="think"></span></div>';
+            ring = left > 0
+                ? `<span class="ring run" style="animation-duration:${left}ms;--from:${Math.min(1, left / total).toFixed(3)}"></span>`
+                : '<span class="ring think"></span>';
         }
 
         const tags = [];
         if (s.me) tags.push('<b class="tag tu">TÚ</b>');
         if (s.kind === 'bot') tags.push('<b class="tag">BOT</b>');
         if (starter) tags.push('<b class="tag salida">SALIDA</b>');
-        const sub = `${tags.join(' ')} ${teamName(team)}`;
 
-        return `<div class="plate pos-${pos} team-${team} ${active ? 'active' : ''}" data-seat="${seat}">
-            <div class="avatar">${initials(s.name)}${s.host ? `<span class="pava">${ICON.pava}</span>` : ''}</div>
-            <div class="info"><div class="name">${esc(s.name)}</div><div class="sub">${sub}</div>
-            ${pos !== 'bottom' ? `<div class="backs">${backs || '<span class="count-pill">¡Se pegó!</span>'}</div>` : ''}</div>
-            ${timer}
+        return `<div class="plate glass pos-${pos} team-${team} ${active ? 'active' : ''}" data-seat="${seat}">
+            <div class="avatar">${ring}${initials(s.name)}${s.host ? `<span class="pava">${ICON.pava}</span>` : ''}</div>
+            <div class="info"><div class="name">${esc(s.name)}</div><div class="sub">${tags.join('')}<span>${teamName(team)}</span></div>
+            ${pos !== 'bottom' ? `<div class="backs">${backs || '<span class="pegado">¡Se pegó!</span>'}</div>` : ''}</div>
         </div>`;
     }
 
@@ -575,16 +603,20 @@
         const S = App.S;
         const g = S.game;
         const el = $('#hand');
+        const dock = $('#dock');
         if (!S.mySeat) {
             el.innerHTML = '<div class="watching">Estás mirando la partida desde afuera</div>';
+            dock.classList.remove('empty');
             return;
         }
         const myTurn = S.phase === 'playing' && g.turn === S.mySeat;
         const moves = arr(g.moves);
         const deal = App.dealAnim;
         App.dealAnim = false;
+        const hand = arr(g.hand);
+        dock.classList.toggle('empty', hand.length === 0);
 
-        el.innerHTML = arr(g.hand)
+        el.innerHTML = hand
             .map((t, i) => {
                 t = arr(t);
                 const playable = myTurn && !App.pending && moves.some((m) => same(arr(m.tile), t[0], t[1]));
@@ -596,33 +628,31 @@
             .join('');
     }
 
-    function renderLibreta() {
+    function renderScore() {
         const S = App.S;
         const g = S.game;
         const t1 = myTeam();
         const t2 = 3 - t1;
-        const history = arr(g.history).slice(-8);
-        const mark = (h) => `${h.capicu ? '<sup>C</sup>' : ''}${h.chuchazo ? '<sup>CH</sup>' : ''}${h.reason === 'tranque' ? '<sup>T</sup>' : ''}`;
-
-        let rows = '';
-        history.forEach((h) => {
-            if (!h.team) {
-                rows += '<div class="c nulo">nula</div><div class="c nulo">nula</div>';
-                return;
-            }
-            rows += `<div class="c">${h.team === t1 ? h.points + mark(h) : ''}</div><div class="c">${h.team === t2 ? h.points + mark(h) : ''}</div>`;
-        });
-        if (!history.length) rows = '<div class="c"></div><div class="c"></div>';
-
         const scores = arr(g.scores);
-        $('#libreta').innerHTML = `
-            <div class="lib-head"><span class="lib-title">La Libreta</span><span class="lib-meta">a ${g.target}</span></div>
-            <div class="lib-cols">
-                <div class="h t${t1}">${teamName(t1)}</div><div class="h t${t2}">${teamName(t2)}</div>
-                ${rows}
-                <div class="tot">${scores[t1 - 1] || 0}</div><div class="tot">${scores[t2 - 1] || 0}</div>
-            </div>
-            <div class="lib-foot"><span>Mano ${g.handNo}</span>${g.bet > 0 ? `<span>Bote: <b>${money(g.pot)}</b></span>` : '<span>De gratis</span>'}</div>`;
+        const target = g.target || 500;
+        const row = (team) => {
+            const pts = scores[team - 1] || 0;
+            const pct = Math.min(100, (pts / target) * 100);
+            return `<div class="team-row"><span class="dot-team t${team}"></span><span class="tname">${teamName(team)}</span><span class="pts">${pts}</span>
+                <div class="progress"><span class="t${team}" style="width:${pct}%"></span></div></div>`;
+        };
+        const history = arr(g.history).slice(-8).map((h) => {
+            if (!h.team) return '<span class="nula">nula</span>';
+            const mark = h.capicu ? '<b>C</b>' : h.chuchazo ? '<b>CH</b>' : h.reason === 'tranque' ? '<b>T</b>' : '';
+            return `<span class="t${h.team}">+${h.points}${mark}</span>`;
+        }).join('');
+
+        $('#score').innerHTML = `<div class="card glass">
+            <h3>Marcador <span class="pill">a ${target}</span></h3>
+            ${row(t1)}${row(t2)}
+            ${history ? `<div class="history">${history}</div>` : ''}
+            <div class="score-foot"><span>Mano ${g.handNo}</span>${g.bet > 0 ? `<span>Bote <b>${money(g.pot)}</b></span>` : '<span>De gratis</span>'}</div>
+        </div>`;
     }
 
     function statusHTML() {
@@ -654,14 +684,13 @@
             sub = S.isHost ? 'Dale a "Otra partida" pa\' seguir' : 'Esperando al anfitrión';
         }
         if (!S.mySeat) sub = 'Estás mirando la partida';
-        return `<div class="status ${mine ? 'mine' : ''}"><div class="coqui">${ICON.coqui}</div><div><div class="status-title">${title}</div><div class="status-sub">${sub}</div></div></div>`;
+        return `<div class="status glass ${mine ? 'mine' : ''}"><div class="coqui">${ICON.coqui}</div><div><div class="status-title">${title}</div><div class="status-sub">${sub}</div></div></div>`;
     }
 
     const SIDE_NAME = { left: 'a la izquierda', right: 'a la derecha', center: 'de salida' };
 
     function logHTML() {
-        const S = App.S;
-        const g = S.game;
+        const g = App.S.game;
         const b = g.board || {};
         const ends = b.center
             ? `<div class="log-ends"><span>Puntas</span><b>${b.leftEnd}</b><i>·</i><b>${b.rightEnd}</b></div>`
@@ -670,33 +699,33 @@
             .map((e) => {
                 const s = seatInfo(e.seat);
                 const who = `<span class="dot-team t${teamOf(e.seat)}"></span><b>${esc(s.name)}</b>`;
-                if (e.pass) return `<li>${who}<span class="pasó">pasó</span></li>`;
+                if (e.pass) return `<li>${who}<span class="paso">pasó</span></li>`;
                 return `<li>${who}${tileHTML(e.tile[0], e.tile[1], 'h')}<span>${SIDE_NAME[e.side] || ''}${e.auto ? ' (auto)' : ''}</span></li>`;
             })
             .join('');
-        return `<div class="card log">${ends}<ul>${items || '<li class="empty">Todavía no se ha jugado nada</li>'}</ul></div>`;
+        return `<div class="log glass">${ends}<ul>${items || '<li class="empty">Todavía no se ha jugado nada</li>'}</ul></div>`;
     }
 
     function phrasesHTML() {
         const S = App.S;
         if (!S.mySeat || !App.phrases.length || !App.phrasesOpen) return '';
-        return `<div class="frases-pop"><div class="side-title">Frases de la mesa</div><div class="frases">${App.phrases
+        return `<div class="frases-pop glass"><div class="side-title">Frases de la mesa</div><div class="frases">${App.phrases
             .map((p, i) => `<button data-phrase="${i + 1}" ${App.phraseLock > Date.now() ? 'disabled' : ''}>${esc(p)}</button>`)
             .join('')}</div></div>`;
     }
 
-    function sideActionsHTML(rulesLabel) {
+    function sideActionsHTML() {
         const S = App.S;
         const canTalk = S.mySeat && App.phrases.length;
         return `<div class="side-actions">
             ${canTalk ? `<button class="btn ${App.phrasesOpen ? 'on' : ''}" data-act="phrases">Frases</button>` : ''}
-            <button class="btn" data-act="rules">${rulesLabel}</button>
-            ${S.mySeat ? '<button class="btn red" data-act="stand">Levantarme</button>' : '<button class="btn" data-act="close">Cerrar</button>'}
+            <button class="btn" data-act="rules">Reglas</button>
+            ${S.mySeat ? '<button class="btn soft-red" data-act="stand">Levantarme</button>' : '<button class="btn" data-act="close">Cerrar</button>'}
         </div>`;
     }
 
     function renderGameSide() {
-        $('#sidePanel').innerHTML = `${statusHTML()}${logHTML()}${phrasesHTML()}${sideActionsHTML('Reglas')}`;
+        $('#sidePanel').innerHTML = `${statusHTML()}${logHTML()}${phrasesHTML()}${sideActionsHTML()}`;
     }
 
     // ------------------------------------------------------------
@@ -713,7 +742,7 @@
                 let body;
                 let action = '';
                 if (s.empty) {
-                    body = `<span class="chair">${ICON.chair}</span><span class="free">Silla libre</span>`;
+                    body = '<span class="chair">+</span><span class="free">Silla libre</span>';
                     if (S.phase === 'lobby') {
                         action = `<button class="btn ${team === 1 ? 'red' : 'blue'}" data-sit="${seat}">${S.mySeat ? 'Cambiarme aquí' : 'Sentarme aquí'}</button>`;
                     }
@@ -721,18 +750,18 @@
                     body = `<div class="avatar" style="--tc:var(--team${team})">${initials(s.name)}${s.host ? `<span class="pava">${ICON.pava}</span>` : ''}</div>
                         <div><div class="name">${esc(s.name)}</div><div class="sub">${s.me ? '<b class="tag tu">TÚ</b> ' : ''}${s.host ? 'Anfitrión' : s.kind === 'bot' ? 'Bot' : 'Listo pa\' jugar'}</div></div>`;
                 }
-                return `<div class="lseat pos-${pos} team-${team} ${s.me ? 'me' : ''}">
-                    <div class="lseat-head"><span>Silla ${seat}</span><span class="team">${team === 1 ? 'Pareja Roja' : 'Pareja Azul'}</span></div>
+                return `<div class="lseat glass pos-${pos} team-${team} ${s.me ? 'me' : ''} ${s.empty ? 'empty' : ''}">
+                    <div class="lseat-head"><span>Silla ${seat}</span><span class="team"><span class="dot-team t${team}"></span>${team === 1 ? 'Roja' : 'Azul'}</span></div>
                     <div class="lseat-body">${body}</div>${action}
                 </div>`;
             })
             .join('');
 
         $('#lobby').innerHTML = `
-            <div class="lobby-center">
-                <div class="garita">${ICON.garita}</div>
+            <div class="hero">
+                <div class="flag">${ICON.flag}</div>
                 <h2>Dominó<em>Boricua</em></h2>
-                <p>En parejas · Doble seis · A la derecha</p>
+                <div class="chips"><span class="chip">En parejas</span><span class="chip">Doble seis</span><span class="chip">A la derecha</span></div>
                 <div class="vs"><span class="dot-team t1"></span>Sillas 1 y 3 &nbsp;vs&nbsp; Sillas 2 y 4<span class="dot-team t2"></span></div>
             </div>
             ${seats}`;
@@ -779,7 +808,7 @@
         else if (humans < 4) hint = `Se juega con ${4 - humans} bot${4 - humans > 1 ? 's' : ''}`;
 
         $('#sidePanel').innerHTML = `
-            <div class="card">
+            <div class="card glass">
                 <h3>La mesa</h3>
                 <div class="field"><span class="field-label">Partida a</span><div class="seg">${targets}</div></div>
                 ${betField}
@@ -787,19 +816,19 @@
                 ${host ? `<button class="btn red big" data-act="start" ${canStart ? '' : 'disabled'}>¡A jugar!</button>` : ''}
                 ${hint ? `<div class="hint">${hint}</div>` : ''}
             </div>
-            <div class="card">
+            <div class="card glass">
                 <h3>Reglas de la casa</h3>
                 <div class="chips">
                     <span class="chip">Capicú <b>+${r.capicu}</b></span>
                     <span class="chip">Chuchazo <b>+${r.chuchazo}</b></span>
-                    <span class="chip">${r.countAll ? 'Se cuentan las 4 manos' : 'Se cuentan las fichas de ellos'}</span>
+                    <span class="chip">${r.countAll ? 'Se cuentan las 4 manos' : 'Se cuentan las de ellos'}</span>
                     <span class="chip">Tranque: ${r.tranqueMode === 'player' ? 'gana el de menos' : 'gana la pareja de menos'}</span>
                     <span class="chip">${r.nextStarter === 'rotate' ? 'La salida rota' : 'Sale el que ganó'}</span>
                     <span class="chip">${r.turnSeconds}s por jugada</span>
                 </div>
             </div>
             ${phrasesHTML()}
-            ${sideActionsHTML('Reglas')}`;
+            ${sideActionsHTML()}`;
     }
 
     // ------------------------------------------------------------
@@ -831,12 +860,13 @@
         const r = g.result;
         const who = seatInfo(r.seat).name || '';
         const tile = arr(r.tile);
-        let stamp = '¡Dominó!';
+        let title = '¡Dominó!';
         let cls = '';
-        if (r.annulled) { stamp = 'Tranque empatado'; cls = 'gold'; }
-        else if (r.chuchazo) stamp = '¡Chuchazo!';
-        else if (r.capicu) stamp = '¡Capicú!';
-        else if (r.reason === 'tranque') { stamp = '¡Se trancó!'; cls = 'blue'; }
+        let badge = '';
+        if (r.annulled) { title = 'Tranque empatado'; cls = 'blue'; }
+        else if (r.chuchazo) { title = '¡Chuchazo!'; badge = `+${r.bonus}`; }
+        else if (r.capicu) { title = '¡Capicú!'; badge = `+${r.bonus}`; }
+        else if (r.reason === 'tranque') { title = '¡Se trancó!'; cls = 'blue'; }
 
         let sub;
         if (r.reason === 'domino') sub = `${esc(who)} se pegó con el ${tile[0]}|${tile[1]}${r.capicu ? ', que servía en las dos puntas' : ''}${r.chuchazo ? ', la chucha' : ''}.`;
@@ -845,11 +875,13 @@
 
         const tp = arr(r.teamPips);
         let gain;
+        let summaryCls = 'nula';
         if (r.annulled) {
             gain = `<div class="gain">Mano nula<small>${teamName(1)} ${tp[0]} · ${teamName(2)} ${tp[1]}</small></div>`;
         } else {
+            summaryCls = `t${r.winnerTeam}`;
             const bonus = r.bonus > 0 ? ` + ${r.bonus} de ${r.capicu ? 'capicú' : 'chuchazo'}` : '';
-            const tranque = r.reason === 'tranque' ? ` (${teamName(1)} ${tp[0]} · ${teamName(2)} ${tp[1]})` : '';
+            const tranque = r.reason === 'tranque' ? ` · ${teamName(1)} ${tp[0]} · ${teamName(2)} ${tp[1]}` : '';
             gain = `<div class="gain">+${r.points + r.bonus} pa' ${teamName(r.winnerTeam)}<small>${r.points} en fichas${bonus}${tranque}</small></div>`;
         }
         const sc = arr(r.scores);
@@ -863,11 +895,11 @@
             next = `<div class="next">Próxima mano en un chin…<div class="bar"><span style="animation-duration:${left}ms;--from:${Math.min(1, left / total).toFixed(3)}"></span></div></div>`;
         }
 
-        return `<div class="result">
-            <div class="stamp ${cls}">${stamp}</div>
+        return `<div class="sheet glass">
+            <div class="sheet-head"><div class="title ${cls}">${title}</div>${badge ? `<span class="badge">${badge}</span>` : ''}</div>
             <div class="sub">${sub}</div>
             <div class="players">${playersHTML(r)}</div>
-            <div class="summary">${gain}<div class="score">${teamName(t1)} <b>${sc[t1 - 1]}</b> · ${teamName(t2)} <b>${sc[t2 - 1]}</b><br>a ${g.target}</div></div>
+            <div class="summary ${summaryCls}">${gain}<div class="score">${teamName(t1)} <b>${sc[t1 - 1]}</b> · ${teamName(t2)} <b>${sc[t2 - 1]}</b><br>a ${g.target}</div></div>
             ${next}
         </div>`;
     }
@@ -884,6 +916,7 @@
             else { title = 'Perdimos, mano'; cls = 'blue'; }
         } else {
             title = `¡Ganó la ${teamName(win)}!`;
+            cls = win === 1 ? 'red' : 'blue';
         }
         const t1 = myTeam();
         const t2 = 3 - t1;
@@ -901,33 +934,31 @@
                 .join('') + '</div>';
         }
 
-        return `<div class="result">
-            <div class="stamp ${cls}">${title}</div>
-            ${f.pollona ? '<div class="stamp pollona">¡POLLONA!</div>' : ''}
+        return `<div class="sheet glass">
+            <div class="sheet-head"><div class="title ${cls}">${title}</div>${f.pollona ? '<span class="badge pollona">¡POLLONA!</span>' : ''}</div>
             <div class="sub">${f.pollona ? 'La otra pareja no se anotó ni un punto. ¡Tremenda pela!' : `Partida a ${g.target} en ${g.handNo} manos.`}</div>
             <div class="final-score">
-                <div class="team t${t1} ${win === t1 ? 'win' : ''}"><span>${teamName(t1)}</span><b>${sc[t1 - 1]}</b></div>
+                <div class="team t${t1} ${win === t1 ? 'win' : ''}"><span><span class="dot-team t${t1}"></span>${teamName(t1)}</span><b>${sc[t1 - 1]}</b></div>
                 <div class="dash">—</div>
-                <div class="team t${t2} ${win === t2 ? 'win' : ''}"><span>${teamName(t2)}</span><b>${sc[t2 - 1]}</b></div>
+                <div class="team t${t2} ${win === t2 ? 'win' : ''}"><span><span class="dot-team t${t2}"></span>${teamName(t2)}</span><b>${sc[t2 - 1]}</b></div>
             </div>
             ${payouts}
             <div class="actions">
                 ${S.isHost ? '<button class="btn red" data-act="rematch">Otra partida</button>' : ''}
-                ${S.mySeat ? '<button class="btn ghost" data-act="stand">Levantarme</button>' : ''}
-                <button class="btn ghost" data-act="close">Cerrar</button>
+                ${S.mySeat ? '<button class="btn" data-act="stand">Levantarme</button>' : ''}
+                <button class="btn" data-act="close">Cerrar</button>
             </div>
         </div>`;
     }
 
     function confettiHTML() {
-        const colors = ['#e0262d', '#ffffff', '#2f73e0', '#f5c542'];
+        const colors = ['#ff4d5e', '#ffffff', '#4c95ff', '#ffd35a'];
         let html = '<div class="confetti">';
         for (let i = 0; i < 70; i++) {
             const left = Math.random() * 100;
             const delay = Math.random() * 1.2;
             const dur = 2.4 + Math.random() * 1.8;
-            const c = colors[i % colors.length];
-            html += `<i style="left:${left}%;background:${c};animation-duration:${dur}s;animation-delay:${delay}s"></i>`;
+            html += `<i style="left:${left}%;background:${colors[i % colors.length]};animation-duration:${dur}s;animation-delay:${delay}s"></i>`;
         }
         return html + '</div>';
     }
@@ -959,8 +990,8 @@
     function rulesHTML() {
         const r = (App.S && App.S.rules) || {};
         const targets = arr(App.S && App.S.limits && App.S.limits.targets).join(', ') || '500';
-        return `<div class="modal-card">
-            <button class="x" data-act="rules-close">×</button>
+        return `<div class="sheet glass">
+            <button class="icon-btn x-btn" data-act="rules-close">×</button>
             <h2>Cómo se juega el <em>dominó boricua</em></h2>
             <ol>
                 <li><b>En parejas.</b> Cuatro jugadores y el compañero se sienta al frente: Pareja Roja (sillas 1 y 3) contra Pareja Azul (sillas 2 y 4).</li>
@@ -975,7 +1006,7 @@
                 <li><b>Pollona.</b> Ganar la partida sin que la otra pareja se anote ni un punto.${r.pollonaDouble ? ' Si hay apuesta, la pollona se paga doble.' : ''}</li>
                 <li><b>El reloj.</b> Tienes ${r.turnSeconds || 30} segundos pa' jugar. Si se acaba, la ficha se juega sola.</li>
             </ol>
-            <p class="glosario"><b>Glosario:</b> <i>la cochina</i> = doble seis · <i>la chucha</i> = doble blanco · <i>pegarse</i> = quedarse sin fichas · <i>ahorcá</i> = un doble que ya no puede salir · <i>la libreta</i> = donde se anotan los tantos · <i>Nosotros / Ellos</i> = las columnas de la libreta</p>
+            <p class="glosario"><b>Glosario:</b> <i>la cochina</i> = doble seis · <i>la chucha</i> = doble blanco · <i>pegarse</i> = quedarse sin fichas · <i>ahorcá</i> = un doble que ya no puede salir · <i>Nosotros / Ellos</i> = las columnas del marcador</p>
         </div>`;
     }
 
@@ -984,6 +1015,171 @@
         const el = $('#rules');
         el.innerHTML = open ? rulesHTML() : '';
         el.classList.toggle('show', open);
+    }
+
+    // ------------------------------------------------------------
+    // Panel de admin y modo colocar
+    // ------------------------------------------------------------
+
+    const PHASE_NAME = { lobby: 'Esperando', playing: 'Jugando', handover: 'Contando', gameover: 'Terminada' };
+
+    function adminListHTML(d) {
+        const models = arr(d.models);
+        if (!App.admin.model || !models.some((m) => m.model === App.admin.model)) App.admin.model = models[0] && models[0].model;
+        const chips = models
+            .map((m) => `<button class="${m.model === App.admin.model ? 'on' : ''}" data-admin-model="${esc(m.model)}">${esc(m.label)}</button>`)
+            .join('');
+        const tables = arr(d.tables);
+        const rows = tables
+            .map((t) => {
+                const c = t.coords || {};
+                const players = t.humans + t.bots > 0 ? `<span class="live">${t.humans} jugador${t.humans === 1 ? '' : 'es'}${t.bots ? ` · ${t.bots} bot${t.bots === 1 ? '' : 's'}` : ''}</span>` : '';
+                const confirming = App.admin.confirm === t.id;
+                return `<div class="arow">
+                    <div>
+                        <div class="aname">${esc(t.label)}</div>
+                        <div class="ameta">
+                            <span class="${t.dynamic ? '' : 'fixed'}">${t.dynamic ? 'Creada en el juego' : 'config.lua'}</span>
+                            <span>${PHASE_NAME[t.phase] || t.phase}</span>
+                            ${players}
+                            <span>${t.maxBet > 0 ? `${money(t.minBet)} – ${money(t.maxBet)}` : 'Sin apuestas'}</span>
+                            <span>${Number(c.x).toFixed(1)}, ${Number(c.y).toFixed(1)}, ${Number(c.z).toFixed(1)}</span>
+                        </div>
+                    </div>
+                    <div class="aacts">
+                        <button class="btn" data-admin="teleport" data-id="${esc(t.id)}">Ir</button>
+                        <button class="btn" data-admin="reset" data-id="${esc(t.id)}">Reiniciar</button>
+                        <button class="btn ${confirming ? 'red' : 'soft-red'}" data-admin="delete" data-id="${esc(t.id)}" ${t.dynamic ? '' : 'disabled title="Está en config.lua"'}>${confirming ? '¿Seguro?' : 'Borrar'}</button>
+                    </div>
+                </div>`;
+            })
+            .join('');
+
+        return `<div class="admin glass">
+            <div class="admin-head">
+                <div><h2>Mesas de dominó</h2><p>${tables.length} mesa${tables.length === 1 ? '' : 's'} en el servidor · se guardan solas</p></div>
+                <span class="spacer"></span>
+                <button class="icon-btn" data-admin="close">×</button>
+            </div>
+            <div class="admin-new">
+                <span class="label">Mesa nueva</span>
+                <div class="model-chips">${chips || '<span class="chip">No hay modelos disponibles</span>'}</div>
+                <button class="btn red" data-admin="place" ${models.length ? '' : 'disabled'}>Colocar mesa</button>
+            </div>
+            <div class="admin-list">${rows || '<div class="admin-empty">Todavía no hay mesas. ¡Coloca la primera!</div>'}</div>
+        </div>`;
+    }
+
+    function adminFormHTML(d) {
+        const f = App.admin.form;
+        const model = arr(d && d.models).find((m) => m.model === f.model);
+        const c = f.coords || {};
+        return `<div class="admin glass">
+            <div class="admin-head">
+                <div><h2>Nueva mesa</h2><p>Ponle nombre y escoge las apuestas</p></div>
+                <span class="spacer"></span>
+                <button class="icon-btn" data-admin="close">×</button>
+            </div>
+            <div class="form-grid">
+                <div class="full"><span class="field-label">Nombre de la mesa</span><input class="input" id="fLabel" maxlength="32" placeholder="Ej: Chinchorro de la Playa" value="${esc(f.label)}"></div>
+                <div><span class="field-label">Apuesta mínima</span><input class="input" id="fMin" type="number" min="0" step="100" value="${f.minBet}"></div>
+                <div><span class="field-label">Apuesta máxima (0 = sin apuestas)</span><input class="input" id="fMax" type="number" min="0" step="100" value="${f.maxBet}"></div>
+                <div class="full"><div class="toggle ${f.blip ? 'on' : ''}" data-admin="blip"><span class="sw"></span><span>Mostrar la mesa en el mapa</span></div></div>
+                <div class="full place-summary">
+                    <span class="chip">${esc(model ? model.label : f.model)}</span>
+                    <span class="chip">${Number(c.x).toFixed(2)}, ${Number(c.y).toFixed(2)}, ${Number(c.z).toFixed(2)}</span>
+                    <span class="chip">Mirando a ${Math.round(Number(c.w) || 0)}°</span>
+                    <span class="chip">4 sillas alrededor</span>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn" data-admin="replace">Volver a colocar</button>
+                <button class="btn red" data-admin="save">Guardar mesa</button>
+            </div>
+        </div>`;
+    }
+
+    function renderAdmin() {
+        const d = App.admin.data;
+        const el = $('#adminLayer');
+        if (!d) {
+            el.innerHTML = '';
+            return;
+        }
+        el.innerHTML = App.admin.view === 'form' && App.admin.form ? adminFormHTML(d) : adminListHTML(d);
+    }
+
+    function readForm() {
+        const f = App.admin.form;
+        if (!f) return;
+        const label = $('#fLabel');
+        if (label) f.label = label.value;
+        const min = $('#fMin');
+        if (min) f.minBet = Math.max(0, Math.floor(Number(min.value) || 0));
+        const max = $('#fMax');
+        if (max) f.maxBet = Math.max(0, Math.floor(Number(max.value) || 0));
+    }
+
+    function onAdmin(el) {
+        switch (el.dataset.admin) {
+            case 'close':
+                App.admin.open = false;
+                App.admin.view = 'list';
+                updateVisibility();
+                return post('adminClose');
+            case 'place':
+                App.admin.confirm = null;
+                return post('adminPlace', { model: App.admin.model });
+            case 'replace':
+                readForm();
+                App.admin.view = 'list';
+                return post('adminPlace', { model: App.admin.form ? App.admin.form.model : App.admin.model });
+            case 'blip':
+                readForm();
+                App.admin.form.blip = !App.admin.form.blip;
+                return renderAdmin();
+            case 'save': {
+                readForm();
+                const f = App.admin.form;
+                post('adminCreate', { coords: f.coords, label: f.label, minBet: f.minBet, maxBet: f.maxBet, model: f.model, blip: f.blip });
+                App.admin.view = 'list';
+                App.admin.form = null;
+                return renderAdmin();
+            }
+            case 'teleport':
+                App.admin.open = false;
+                updateVisibility();
+                return post('adminTeleport', { id: el.dataset.id });
+            case 'reset':
+                return post('adminReset', { id: el.dataset.id });
+            case 'delete':
+                if (App.admin.confirm !== el.dataset.id) {
+                    App.admin.confirm = el.dataset.id;
+                    return renderAdmin();
+                }
+                App.admin.confirm = null;
+                return post('adminDelete', { id: el.dataset.id });
+        }
+        return undefined;
+    }
+
+    function renderPlacement() {
+        const p = App.placement;
+        const el = $('#placementHud');
+        if (!p.show) {
+            el.innerHTML = '';
+            return;
+        }
+        el.innerHTML = `
+            <div class="hud-title">Colocando ${esc(p.label || 'la mesa')}<small><span class="valid-dot ${p.valid ? '' : 'bad'}"></span>${p.valid ? 'Listo pa\' colocar' : 'Apunta al piso, más cerca'}</small></div>
+            <div class="hud-deg">${p.heading}°</div>
+            <div class="keys">
+                <span><kbd>Rueda</kbd> Girar</span>
+                <span><kbd>Shift</kbd> Fino</span>
+                <span><kbd>Q</kbd><kbd>E</kbd> Suave</span>
+                <span><kbd>Clic</kbd> Colocar</span>
+                <span><kbd>Clic der.</kbd> Cancelar</span>
+            </div>`;
     }
 
     // ------------------------------------------------------------
@@ -1046,6 +1242,15 @@
 
     document.addEventListener('click', (e) => {
         const t = e.target;
+
+        const adminEl = t.closest('[data-admin]');
+        if (adminEl && !adminEl.disabled) return onAdmin(adminEl);
+        const modelEl = t.closest('[data-admin-model]');
+        if (modelEl) {
+            App.admin.model = modelEl.dataset.adminModel;
+            return renderAdmin();
+        }
+
         const tile = t.closest('#hand .tile');
         if (tile) return onHandTile(tile);
 
@@ -1080,10 +1285,10 @@
             case 'rematch': return post('rematch');
             case 'close': return closeUI();
             case 'rules': return toggleRules(true);
+            case 'rules-close': return toggleRules(false);
             case 'phrases':
                 App.phrasesOpen = !App.phrasesOpen;
                 return render();
-            case 'rules-close': return toggleRules(false);
         }
     });
 

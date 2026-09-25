@@ -132,6 +132,31 @@ function Bridge.AddMoney(src, amount, reason)
     return ok and result ~= false
 end
 
+-- Admin: permisos ACE (command.dominoadmin / dominoboricua.admin) o grupos del framework
+function Bridge.IsAdmin(src)
+    if src == 0 then return true end
+    for _, ace in ipairs(Config.Admin.aces) do
+        if IsPlayerAceAllowed(src, ace) then return true end
+    end
+    local fw = Bridge.GetFramework()
+    local ok, result = pcall(function()
+        core()
+        if fw == 'qbcore' then
+            for _, group in ipairs(Config.Admin.groups) do
+                if QBCore.Functions.HasPermission(src, group) then return true end
+            end
+        elseif fw == 'esx' then
+            local player = ESX.GetPlayerFromId(src)
+            local group = player and player.getGroup()
+            for _, allowed in ipairs(Config.Admin.groups) do
+                if group == allowed then return true end
+            end
+        end
+        return false
+    end)
+    return ok and result == true
+end
+
 -- kind: 'success' | 'error' | 'info'
 function Bridge.Notify(src, msg, kind)
     TriggerClientEvent('domino_boricua:client:notify', src, msg, kind or 'info')

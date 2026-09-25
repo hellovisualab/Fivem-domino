@@ -33,6 +33,22 @@ Config.OpenKey = ''
 Config.CoordsCommand = 'dominocoords'
 
 -- ============================================================
+--  ADMIN
+--  /dominoadmin abre el panel pa' crear mesas donde quieras.
+--  Tiene permiso quien tenga alguno de estos ACE (los admins con
+--  'add_ace group.admin command allow' ya lo tienen) o, en QBCore/ESX,
+--  alguno de estos grupos.
+-- ============================================================
+
+Config.Admin = {
+    command = 'dominoadmin',
+    aces = { 'command.dominoadmin', 'dominoboricua.admin' },
+    groups = { 'admin', 'god', 'superadmin' },
+    maxBet = 1000000,  -- tope de apuesta que se puede poner en una mesa
+    minDistance = 3.0, -- distancia mínima entre dos mesas
+}
+
+-- ============================================================
 --  DINERO / APUESTAS
 -- ============================================================
 
@@ -106,6 +122,12 @@ Config.Bots = {
         'Don Cheo', 'Tití Carmen', 'Papo', 'Wiso', 'Doña Fela', 'Guillo',
         'Cuco', 'Tata', 'Junior', 'Nano', 'Toño', 'Millo',
     },
+    -- Los bots se sientan en la mesa como NPCs (solo local en cada cliente)
+    spawnPeds = true,
+    models = {
+        'a_m_m_mexlabor_01', 'a_m_o_genstreet_01', 'a_m_m_og_boss_01',
+        'a_f_m_downtown_01', 'a_m_m_salton_02', 'a_f_o_genstreet_01',
+    },
 }
 
 -- Frases rápidas que los jugadores pueden gritar en la mesa
@@ -130,12 +152,40 @@ Config.PhraseCooldown = 3000
 Config.Props = {
     spawn = true,                    -- crear mesa y sillas (solo local, no en red)
     spawnDistance = 80.0,
-    table = 'prop_table_03',
-    chair = 'prop_chair_01a',
+    table = 'prop_table_03',         -- mesa por defecto
+    chair = 'prop_chair_01a',        -- silla de respaldo si la del modelo no existe
     chairHeadingOffset = 180.0,      -- ajusta si las sillas quedan de espaldas
-    seatDistance = 0.95,             -- distancia de la silla al centro de la mesa
+    chairGap = 0.45,                 -- espacio entre el borde de la mesa y la silla
+    seatDistance = 0.95,             -- si no se puede medir la mesa
     sitZOffset = 0.5,
     sitScenario = 'PROP_HUMAN_SEAT_CHAIR_MP_PLAYER',
+
+    -- Modelos que el admin puede escoger al crear una mesa.
+    -- Solo salen en el panel los que existen en tu build del juego.
+    tableModels = {
+        { model = 'prop_table_03', chair = 'prop_table_03_chr', label = 'Madera clásica' },
+        { model = 'prop_table_04', chair = 'prop_table_04_chr', label = 'Cuadrada de patio' },
+        { model = 'prop_table_01', chair = 'prop_table_01_chr_a', label = 'Terraza' },
+        { model = 'prop_table_02', chair = 'prop_table_02_chr', label = 'Marquesina' },
+        { model = 'prop_table_06', chair = 'prop_table_06_chr', label = 'Moderna' },
+    },
+}
+
+-- ============================================================
+--  MESA EN 3D
+--  Las fichas se dibujan sobre la mesa física pa' que todo el que
+--  pase por el lado vea la partida, y cada jugador tiene sus fichas
+--  paradas frente a su silla.
+-- ============================================================
+
+Config.World = {
+    enabled = true,
+    drawDistance = 15.0,     -- distancia pa' ver las fichas en la mesa
+    pipsDistance = 4.0,      -- los puntitos solo se dibujan de cerca (rendimiento)
+    handTiles = true,        -- fichas paradas frente a cada jugador
+    turnMarker = true,       -- flecha encima del que le toca
+    tableHeight = 0.78,      -- si no hay prop (mesa del mapa)
+    tableSize = 0.9,         -- tamaño de la superficie si no se puede medir
 }
 
 Config.Blip = {
@@ -147,7 +197,10 @@ Config.Blip = {
 }
 
 -- ============================================================
---  MESAS
+--  MESAS FIJAS
+--  Lo más fácil es crearlas en el juego con /dominoadmin (se guardan en
+--  data/tables.json). Estas de aquí son fijas y no se pueden borrar desde
+--  el panel.
 --  coords = vector4(x, y, z, heading) del centro de la mesa (a nivel del piso)
 --  Usa /dominocoords parado donde quieras la mesa para sacar la línea.
 -- ============================================================
@@ -158,6 +211,8 @@ Config.Tables = {
         label = 'Mesa de la Plaza',
         coords = vector4(199.2, -937.6, 30.0, 144.5),
         spawnProps = true,
+        tableModel = 'prop_table_03',
+        chairModel = 'prop_table_03_chr',
         blip = true,
         minBet = 0,
         maxBet = 5000,

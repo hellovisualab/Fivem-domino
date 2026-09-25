@@ -7,10 +7,10 @@
 </head>
 <body>
     <div id="app">
-        <div id="stage">
-            <div class="stage-stripes"></div>
+        <div class="ambient"><i class="b1"></i><i class="b2"></i><i class="b3"></i><i class="b4"></i></div>
 
-            <header class="topbar">
+        <div id="stage">
+            <header class="topbar glass">
                 <div class="brand">
                     <span class="flag" data-icon="flag"></span>
                     <div class="brand-text">
@@ -18,7 +18,7 @@
                         <small id="tableLabel">La mesa del barrio</small>
                     </div>
                 </div>
-                <div class="phase-chip" id="phaseChip"></div>
+                <div class="phase" id="phaseChip"></div>
                 <div class="top-actions">
                     <button class="icon-btn" id="btnRules" title="Reglas">?</button>
                     <button class="icon-btn" id="btnSound" title="Sonido"></button>
@@ -27,29 +27,30 @@
             </header>
 
             <main class="layout">
-                <section class="mesa">
-                    <div class="felt" id="felt">
-                        <div class="felt-star" data-icon="star"></div>
-                        <div id="lobby" class="view"></div>
-                        <div id="game" class="view">
-                            <div id="board"></div>
-                            <div id="plates"></div>
-                            <div id="hand"></div>
-                        </div>
-                        <div id="bubbles"></div>
-                        <div id="shout"></div>
-                        <div id="overlay"></div>
+                <section class="mesa glass" id="mesa">
+                    <div class="mesa-star" data-icon="star"></div>
+                    <div id="lobby" class="view"></div>
+                    <div id="game" class="view">
+                        <div id="board"></div>
+                        <div id="plates"></div>
+                        <div id="dock" class="glass"><div id="hand"></div></div>
                     </div>
+                    <div id="bubbles"></div>
+                    <div id="shout"></div>
+                    <div id="overlay"></div>
                 </section>
 
                 <aside class="side">
-                    <div class="libreta" id="libreta"></div>
+                    <div id="score"></div>
                     <div class="side-panel" id="sidePanel"></div>
                 </aside>
             </main>
 
             <div class="modal" id="rules"></div>
         </div>
+
+        <div id="adminLayer"></div>
+        <div id="placementHud" class="glass"></div>
     </div>
     <script src="app.js"></script>
 </body>

@@ -1,9 +1,14 @@
--- Dominó Boricua: cliente (props, sillas, interacción y NUI)
+-- Dominó Boricua: cliente (mesas, sillas, interacción y NUI)
 
-local Mesas = {}          -- [id] = { cfg, center, heading, groundZ, objects, zone, useKey }
-local uiOpen = false
-local viewTable = nil     -- mesa que se está mirando en la NUI
-local sitting = nil       -- { tableId, seat }
+DominoCL = {
+    Mesas = {},       -- [id] = { cfg, center, heading, groundZ, top, halfW, halfD, objects, ... }
+    sitting = nil,    -- { tableId, seat }
+    uiOpen = false,   -- ventana de la mesa abierta
+    adminOpen = false,
+}
+
+local Mesas = DominoCL.Mesas
+local viewTable = nil
 local lastTurnNotified = -1
 local nuiReady = false
 
@@ -15,25 +20,49 @@ local SEAT_LOCAL = {
     { -1.0, 0.0, 270.0 },
 }
 
-local function rotate(x, y, heading)
+function DominoCL.rotate(x, y, heading)
     local r = math.rad(heading)
     return x * math.cos(r) - y * math.sin(r), x * math.sin(r) + y * math.cos(r)
 end
 
-local function seatPosition(mesa, seat)
+-- Sirve pa' mesas de verdad y pa' la mesa fantasma del modo colocar
+function DominoCL.seatPosition(mesa, seat)
     local o = SEAT_LOCAL[seat]
     local d = Config.Props.seatDistance
-    local ox, oy = rotate(o[1] * d, o[2] * d, mesa.heading)
+    if mesa.halfW then
+        local half = (seat % 2 == 1) and mesa.halfD or mesa.halfW
+        d = half + Config.Props.chairGap
+    end
+    local ox, oy = DominoCL.rotate(o[1] * d, o[2] * d, mesa.heading)
     return vector3(mesa.center.x + ox, mesa.center.y + oy, mesa.groundZ), (mesa.heading + o[3]) % 360.0
 end
 
-local function loadModel(model)
+function DominoCL.loadModel(model)
+    if not model then return nil end
     local hash = type(model) == 'number' and model or GetHashKey(model)
     if not IsModelInCdimage(hash) then return nil end
     RequestModel(hash)
     local timeout = GetGameTimer() + 5000
     while not HasModelLoaded(hash) and GetGameTimer() < timeout do Wait(10) end
     return HasModelLoaded(hash) and hash or nil
+end
+
+-- Mide la superficie de la mesa pa' poner las sillas y las fichas donde van
+function DominoCL.measure(target, hash)
+    local minDim, maxDim = GetModelDimensions(hash)
+    target.halfW = math.max(0.2, (maxDim.x - minDim.x) / 2)
+    target.halfD = math.max(0.2, (maxDim.y - minDim.y) / 2)
+    return maxDim.z
+end
+
+function DominoCL.chairFor(tableModel, chairModel)
+    if chairModel and IsModelInCdimage(GetHashKey(chairModel)) then return chairModel end
+    for _, preset in ipairs(Config.Props.tableModels) do
+        if preset.model == tableModel and preset.chair and IsModelInCdimage(GetHashKey(preset.chair)) then
+            return preset.chair
+        end
+    end
+    return Config.Props.chair
 end
 
 local function spawnObject(hash, pos, heading)
@@ -46,22 +75,26 @@ local function spawnObject(hash, pos, heading)
 end
 
 local function spawnProps(mesa)
-    local tableHash = loadModel(mesa.cfg.tableModel or Config.Props.table)
+    local tableModel = mesa.cfg.tableModel or Config.Props.table
+    local tableHash = DominoCL.loadModel(tableModel) or DominoCL.loadModel(Config.Props.table)
     if tableHash then
         local obj = spawnObject(tableHash, mesa.center, mesa.heading)
-        mesa.groundZ = GetEntityCoords(obj).z
+        local topOffset = DominoCL.measure(mesa, tableHash)
+        local z = GetEntityCoords(obj).z
+        mesa.groundZ = z
+        mesa.top = z + topOffset
         mesa.objects[#mesa.objects + 1] = obj
         SetModelAsNoLongerNeeded(tableHash)
     end
-    local chairHash = loadModel(mesa.cfg.chairModel or Config.Props.chair)
+    local chairHash = DominoCL.loadModel(DominoCL.chairFor(tableModel, mesa.cfg.chairModel))
     if chairHash then
         for seat = 1, 4 do
-            local pos, heading = seatPosition(mesa, seat)
-            local obj = spawnObject(chairHash, pos, heading + Config.Props.chairHeadingOffset)
-            mesa.objects[#mesa.objects + 1] = obj
+            local pos, heading = DominoCL.seatPosition(mesa, seat)
+            mesa.objects[#mesa.objects + 1] = spawnObject(chairHash, pos, heading + Config.Props.chairHeadingOffset)
         end
         SetModelAsNoLongerNeeded(chairHash)
     end
+    mesa.propsReady = true
 end
 
 local function deleteProps(mesa)
@@ -69,15 +102,27 @@ local function deleteProps(mesa)
         if DoesEntityExist(obj) then DeleteEntity(obj) end
     end
     mesa.objects = {}
+    mesa.propsReady = false
 end
 
 -- ------------------------------------------------------------
 -- NUI
 -- ------------------------------------------------------------
 
+function DominoCL.refreshFocus()
+    local focus = DominoCL.uiOpen or DominoCL.adminOpen
+    SetNuiFocus(focus, focus)
+end
+
+function DominoCL.initNui()
+    if nuiReady then return end
+    nuiReady = true
+    SendNUIMessage({ action = 'init', phrases = Config.Phrases })
+end
+
 local function setUI(open)
-    uiOpen = open
-    SetNuiFocus(open, open)
+    DominoCL.uiOpen = open
+    DominoCL.refreshFocus()
     SendNUIMessage({ action = open and 'open' or 'close' })
 end
 
@@ -98,17 +143,14 @@ local function nearestTable(maxDist)
 end
 
 RegisterNetEvent('domino_boricua:client:state', function(state)
-    if not nuiReady then
-        nuiReady = true
-        SendNUIMessage({ action = 'init', phrases = Config.Phrases })
-    end
+    DominoCL.initNui()
     viewTable = state.id
     SendNUIMessage({ action = 'state', state = state })
-    if state.open and not uiOpen then setUI(true) end
+    if state.open and not DominoCL.uiOpen then setUI(true) end
 
     -- Aviso cuando te toca y tienes la mesa cerrada
     local g = state.game
-    if sitting and not uiOpen and g and state.phase == 'playing' and g.turn == state.mySeat
+    if DominoCL.sitting and not DominoCL.uiOpen and g and state.phase == 'playing' and g.turn == state.mySeat
         and g.actionId ~= lastTurnNotified then
         lastTurnNotified = g.actionId
         Bridge.Notify(L('your_turn'), 'info')
@@ -120,9 +162,16 @@ RegisterNetEvent('domino_boricua:client:phrase', function(seat, index)
     SendNUIMessage({ action = 'phrase', seat = seat, index = index })
 end)
 
+-- La mesa que estabas mirando ya no existe
+RegisterNetEvent('domino_boricua:client:closed', function(id)
+    if viewTable ~= id then return end
+    viewTable = nil
+    if DominoCL.uiOpen then setUI(false) end
+end)
+
 RegisterNUICallback('close', function(_, cb)
     setUI(false)
-    if not sitting then
+    if not DominoCL.sitting then
         TriggerServerEvent('domino_boricua:server:close')
         viewTable = nil
     end
@@ -169,26 +218,25 @@ end)
 -- ------------------------------------------------------------
 
 local function standUp()
-    if not sitting then return end
-    sitting = nil
-    local ped = PlayerPedId()
-    ClearPedTasks(ped)
-    FreezeEntityPosition(ped, false)
+    if not DominoCL.sitting then return end
+    DominoCL.sitting = nil
+    ClearPedTasks(PlayerPedId())
 end
 
 RegisterNetEvent('domino_boricua:client:sit', function(tableId, seat)
     local mesa = Mesas[tableId]
     if not mesa then return end
     local ped = PlayerPedId()
-    local pos, heading = seatPosition(mesa, seat)
-    if sitting then ClearPedTasksImmediately(ped) end
-    sitting = { tableId = tableId, seat = seat }
+    local pos, heading = DominoCL.seatPosition(mesa, seat)
+    if DominoCL.sitting then ClearPedTasksImmediately(ped) end
+    local sitting = { tableId = tableId, seat = seat }
+    DominoCL.sitting = sitting
     TaskStartScenarioAtPosition(ped, Config.Props.sitScenario, pos.x, pos.y, pos.z + Config.Props.sitZOffset,
         heading, 0, true, true)
 
     CreateThread(function()
         local since = GetGameTimer()
-        while sitting and sitting.tableId == tableId and sitting.seat == seat do
+        while DominoCL.sitting == sitting do
             -- no dejar que se levante caminando por accidente
             DisableControlAction(0, 30, true)
             DisableControlAction(0, 31, true)
@@ -196,7 +244,7 @@ RegisterNetEvent('domino_boricua:client:sit', function(tableId, seat)
             DisableControlAction(0, 22, true)
             DisableControlAction(0, 44, true)
 
-            if not uiOpen then
+            if not DominoCL.uiOpen and not DominoCL.adminOpen then
                 BeginTextCommandDisplayHelp('STRING')
                 AddTextComponentSubstringPlayerName(L('seated_help'))
                 EndTextCommandDisplayHelp(0, false, false, -1)
@@ -207,10 +255,10 @@ RegisterNetEvent('domino_boricua:client:sit', function(tableId, seat)
                 end
             end
 
-            local ped = PlayerPedId()
             -- si muere o lo sacan de la silla (tp, admin...), se levanta de la mesa
-            local moved = GetGameTimer() - since > 3000 and #(GetEntityCoords(ped) - pos) > 5.0
-            if IsEntityDead(ped) or moved then
+            local p = PlayerPedId()
+            local moved = GetGameTimer() - since > 3000 and #(GetEntityCoords(p) - pos) > 5.0
+            if IsEntityDead(p) or moved then
                 TriggerServerEvent('domino_boricua:server:stand')
                 break
             end
@@ -224,7 +272,7 @@ RegisterNetEvent('domino_boricua:client:stand', function()
 end)
 
 -- ------------------------------------------------------------
--- Mesas: blips, target, props por cercanía
+-- Mesas: blips, target y props por cercanía
 -- ------------------------------------------------------------
 
 local function drawText3D(coords, text)
@@ -282,32 +330,83 @@ local function setupInteraction(id, mesa)
     mesa.targetMode = mode
 end
 
-CreateThread(function()
-    for _, cfg in ipairs(Config.Tables) do
-        local c = cfg.coords
-        local mesa = {
-            cfg = cfg,
-            center = vector3(c.x, c.y, c.z),
-            heading = c.w or 0.0,
-            groundZ = c.z,
-            objects = {},
-        }
-        Mesas[cfg.id] = mesa
+local function addMesa(cfg)
+    local c = cfg.coords
+    local mesa = {
+        cfg = cfg,
+        center = vector3(c.x, c.y, c.z),
+        heading = c.w or 0.0,
+        groundZ = c.z,
+        -- sin prop (mesa del mapa) se usan las medidas de Config.World
+        top = c.z + Config.World.tableHeight,
+        halfW = Config.World.tableSize / 2,
+        halfD = Config.World.tableSize / 2,
+        objects = {},
+    }
+    Mesas[cfg.id] = mesa
 
-        if Config.Blip.enabled and cfg.blip ~= false then
-            local blip = AddBlipForCoord(c.x, c.y, c.z)
-            SetBlipSprite(blip, Config.Blip.sprite)
-            SetBlipColour(blip, Config.Blip.color)
-            SetBlipScale(blip, Config.Blip.scale)
-            SetBlipAsShortRange(blip, true)
-            BeginTextCommandSetBlipName('STRING')
-            AddTextComponentSubstringPlayerName(cfg.label or Config.Blip.label)
-            EndTextCommandSetBlipName(blip)
-            mesa.blip = blip
-        end
-
-        setupInteraction(cfg.id, mesa)
+    if Config.Blip.enabled and cfg.blip ~= false then
+        local blip = AddBlipForCoord(c.x, c.y, c.z)
+        SetBlipSprite(blip, Config.Blip.sprite)
+        SetBlipColour(blip, Config.Blip.color)
+        SetBlipScale(blip, Config.Blip.scale)
+        SetBlipAsShortRange(blip, true)
+        BeginTextCommandSetBlipName('STRING')
+        AddTextComponentSubstringPlayerName(cfg.label or Config.Blip.label)
+        EndTextCommandSetBlipName(blip)
+        mesa.blip = blip
     end
+
+    setupInteraction(cfg.id, mesa)
+end
+
+local function removeMesa(id)
+    local mesa = Mesas[id]
+    if not mesa then return end
+    deleteProps(mesa)
+    if mesa.blip then RemoveBlip(mesa.blip) end
+    if mesa.targetMode == 'ox_target' and mesa.zone then
+        exports.ox_target:removeZone(mesa.zone)
+    elseif mesa.targetMode == 'qb-target' and mesa.zone then
+        exports['qb-target']:RemoveZone(mesa.zone)
+    end
+    if DominoCL.clearWorld then DominoCL.clearWorld(id) end
+    Mesas[id] = nil
+end
+
+local function sameCfg(a, b)
+    return a.label == b.label and a.blip == b.blip and a.spawnProps == b.spawnProps
+        and a.tableModel == b.tableModel and a.chairModel == b.chairModel
+        and a.coords.x == b.coords.x and a.coords.y == b.coords.y
+        and a.coords.z == b.coords.z and a.coords.w == b.coords.w
+end
+
+-- El servidor manda la lista completa cada vez que un admin crea o borra una mesa
+RegisterNetEvent('domino_boricua:client:tables', function(list)
+    local seen = {}
+    for _, cfg in ipairs(list) do
+        seen[cfg.id] = true
+        local mesa = Mesas[cfg.id]
+        if mesa and not sameCfg(mesa.cfg, cfg) then
+            removeMesa(cfg.id)
+            mesa = nil
+        end
+        if not mesa then addMesa(cfg) end
+    end
+    for id in pairs(Mesas) do
+        if not seen[id] then removeMesa(id) end
+    end
+end)
+
+RegisterNetEvent('domino_boricua:client:teleport', function(coords)
+    local ped = PlayerPedId()
+    local ox, oy = DominoCL.rotate(0.0, -2.4, coords.w or 0.0)
+    SetEntityCoords(ped, coords.x + ox, coords.y + oy, coords.z + 0.5, false, false, false, false)
+    SetEntityHeading(ped, coords.w or 0.0)
+end)
+
+CreateThread(function()
+    TriggerServerEvent('domino_boricua:server:tables')
 
     -- Crear/borrar props según la distancia
     while true do
@@ -330,7 +429,7 @@ end)
 CreateThread(function()
     while true do
         local sleep = 1000
-        if not sitting and not uiOpen then
+        if not DominoCL.sitting and not DominoCL.uiOpen and not DominoCL.adminOpen then
             local pos = GetEntityCoords(PlayerPedId())
             for id, mesa in pairs(Mesas) do
                 if mesa.useKey then
@@ -338,7 +437,7 @@ CreateThread(function()
                     if dist < 12.0 then
                         sleep = 0
                         if dist <= Config.InteractDistance then
-                            drawText3D(vector3(mesa.center.x, mesa.center.y, mesa.groundZ + 1.1), L('press_to_open'))
+                            drawText3D(vector3(mesa.center.x, mesa.center.y, mesa.top + 0.35), L('press_to_open'))
                             if IsControlJustReleased(0, Config.InteractKey) then openTable(id) end
                         end
                     end
@@ -354,7 +453,7 @@ end)
 -- ------------------------------------------------------------
 
 RegisterCommand(Config.OpenCommand, function()
-    if sitting then return openTable(sitting.tableId) end
+    if DominoCL.sitting then return openTable(DominoCL.sitting.tableId) end
     local id = nearestTable(Config.InteractDistance + 1.5)
     if id then
         openTable(id)
@@ -381,15 +480,7 @@ end, false)
 
 AddEventHandler('onResourceStop', function(resource)
     if resource ~= GetCurrentResourceName() then return end
-    for _, mesa in pairs(Mesas) do
-        deleteProps(mesa)
-        if mesa.blip then RemoveBlip(mesa.blip) end
-        if mesa.targetMode == 'ox_target' and mesa.zone then
-            exports.ox_target:removeZone(mesa.zone)
-        elseif mesa.targetMode == 'qb-target' and mesa.zone then
-            exports['qb-target']:RemoveZone(mesa.zone)
-        end
-    end
-    if sitting then standUp() end
-    if uiOpen then SetNuiFocus(false, false) end
+    for id in pairs(Mesas) do removeMesa(id) end
+    if DominoCL.sitting then standUp() end
+    SetNuiFocus(false, false)
 end)
