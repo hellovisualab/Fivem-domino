@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Dominó Boricua</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="stage">
+            <div class="stage-stripes"></div>
+
+            <header class="topbar">
+                <div class="brand">
+                    <span class="flag" data-icon="flag"></span>
+                    <div class="brand-text">
+                        <h1>Dominó <em>Boricua</em></h1>
+                        <small id="tableLabel">La mesa del barrio</small>
+                    </div>
+                </div>
+                <div class="phase-chip" id="phaseChip"></div>
+                <div class="top-actions">
+                    <button class="icon-btn" id="btnRules" title="Reglas">?</button>
+                    <button class="icon-btn" id="btnSound" title="Sonido"></button>
+                    <button class="icon-btn close" id="btnClose" title="Cerrar (ESC)">&times;</button>
+                </div>
+            </header>
+
+            <main class="layout">
+                <section class="mesa">
+                    <div class="felt" id="felt">
+                        <div class="felt-star" data-icon="star"></div>
+                        <div id="lobby" class="view"></div>
+                        <div id="game" class="view">
+                            <div id="board"></div>
+                            <div id="plates"></div>
+                            <div id="hand"></div>
+                        </div>
+                        <div id="bubbles"></div>
+                        <div id="shout"></div>
+                        <div id="overlay"></div>
+                    </div>
+                </section>
+
+                <aside class="side">
+                    <div class="libreta" id="libreta"></div>
+                    <div class="side-panel" id="sidePanel"></div>
+                </aside>
+            </main>
+
+            <div class="modal" id="rules"></div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
